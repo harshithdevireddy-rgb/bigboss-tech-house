@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIG BOSS: TECH HOUSE — Digital Command Center</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👁️</text></svg>">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Master Header -->
+        <header class="bb-header">
+            <div class="brand-section">
+                <!-- Iconic Animated Big Boss Eye -->
+                <div class="bb-eye-wrapper" title="Click to trigger Big Boss Eye Theme!">
+                    <div class="bb-eye-sclera">
+                        <div class="bb-eye-iris">
+                            <div class="bb-eye-pupil"></div>
+                        </div>
+                        <div class="bb-eye-scanner"></div>
+                    </div>
+                </div>
+                <div class="brand-text">
+                    <h1>BIG BOSS <span style="font-size: 0.8em; color: var(--primary-red);">TECH HOUSE</span></h1>
+                    <div class="tagline">Digital Command Center • Season 10.0</div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Theme / Background Mood Switcher -->
+                <div class="theme-switch-group" title="Change Background Mood">
+                    <span class="theme-label">Mood:</span>
+                    <button class="theme-toggle-btn active" id="themeBtn-black" onclick="app.setTheme('black')" title="Dark Mode (Black)">🌑 Black</button>
+                    <button class="theme-toggle-btn" id="themeBtn-white" onclick="app.setTheme('white')" title="Light Mode (White)">☀️ White</button>
+                    <button class="theme-toggle-btn" id="themeBtn-beige" onclick="app.setTheme('beige')" title="Warm Mode (Beige)">☕ Beige</button>
+                </div>
+
+                <div class="audio-controls" title="Sound Effects & Voice Engine">
+                    <button class="icon-btn" id="muteToggleBtn" title="Mute/Unmute Audio">🔊</button>
+                    <input type="range" id="volumeControl" class="vol-slider" min="0" max="1" step="0.05" value="0.8" title="Master Volume">
+                </div>
+
+                <!-- Live Mic Intercom Broadcaster for Lead -->
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <button class="bb-btn bb-btn-danger bb-btn-sm" id="headerMicBtn" onclick="app.toggleMicBroadcast()" title="Broadcast your voice live to all contestants">
+                        <span id="headerMicIcon">🎙️</span> <span id="headerMicText">Live Mic</span>
+                    </button>
+                    <canvas id="headerMicCanvas" width="50" height="24" style="display:none; border-radius: 4px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,30,86,0.4);" title="Live Mic VU Meter"></canvas>
+                </div>
+
+                <button class="bb-btn bb-btn-primary bb-btn-sm" onclick="app.broadcastAnnouncement('Bigg Boss chahte hain ki sabhi gharwale turant living area mein hazir ho jayein!')">
+                    📢 Call House
+                </button>
+
+                <button class="bb-btn bb-btn-outline bb-btn-sm" onclick="app.resetHouseData()" title="Reset to initial state">
+                    🔄 Reset
+                </button>
+            </div>
+        </header>
+
+        <!-- Live Broadcast Ticker -->
+        <div class="broadcast-ticker">
+            <div class="ticker-badge">
+                <div class="live-dot"></div>
+                LIVE DECREE
+            </div>
+            <div class="ticker-content" id="broadcastTickerText">
+                📢 BIGG BOSS: "Bigg Boss is watching every single line of code in the Tech House!"
+            </div>
+            <button class="icon-btn" style="color: var(--primary-gold);" onclick="window.soundEngine.playAnnouncementChime();" title="Play Chime">🔔</button>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="overview">
+                <span>🏠 Command Center</span>
+            </button>
+            <button class="tab-btn" data-tab="contestants">
+                <span>👥 Contestants</span>
+                <span class="tab-badge" id="badgeTotalContestants">10</span>
+            </button>
+            <button class="tab-btn" data-tab="leaderboard">
+                <span>🏆 Leaderboard</span>
+            </button>
+            <button class="tab-btn" data-tab="danger">
+                <span>⚠️ Danger Zone</span>
+                <span class="tab-badge" id="badgeNominatedCount" style="background: var(--primary-red); color: #fff;">4</span>
+            </button>
+            <button class="tab-btn" data-tab="tasks">
+                <span>📋 Tasks & Timer</span>
+                <span class="tab-badge" id="badgePendingTasks">2</span>
+            </button>
+            <button class="tab-btn" data-tab="announcements">
+                <span>📢 Big Boss Studio</span>
+            </button>
+            <button class="tab-btn" data-tab="soundboard">
+                <span>🔊 SFX Soundboard</span>
+            </button>
+            <button class="tab-btn" data-tab="evicted">
+                <span>☠️ Evicted Hall</span>
+            </button>
+        </nav>
+
+        <!-- ================= TAB 1: OVERVIEW ================= -->
+        <div class="tab-panel active" id="tab-overview">
+            <!-- Captain Spotlight -->
+            <div class="captain-banner" id="captainBanner"></div>
+
+            <!-- Live House Statistics Strip -->
+            <div class="stats-strip">
+                <div class="stat-box">
+                    <div class="stat-icon red">🔥</div>
+                    <div class="stat-info">
+                        <div class="label">House Drama Index</div>
+                        <div class="value" id="statDramaIndex">72% 🔥</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon gold">🪙</div>
+                    <div class="stat-info">
+                        <div class="label">Total Points in Play</div>
+                        <div class="value" id="statTotalPoints">7,600</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon green">🏆</div>
+                    <div class="stat-info">
+                        <div class="label">MVP Leader</div>
+                        <div class="value" id="statHighestScorer">Ada Lovelace</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon purple">📉</div>
+                    <div class="stat-info">
+                        <div class="label">Lowest Points</div>
+                        <div class="value" id="statLowestScorer">Mark Meta</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon cyan">✅</div>
+                    <div class="stat-info">
+                        <div class="label">Task Completion</div>
+                        <div class="value" id="statTaskRate">50%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overview-grid">
+                <!-- Left: Quick Leaderboard -->
+                <div class="col-8">
+                    <div class="bb-card border-gold">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">🏆 Real-Time House Leaderboard</h3>
+                                <p class="card-subtitle">Live rankings updating dynamically based on points and tasks</p>
+                            </div>
+                            <button class="bb-btn bb-btn-outline bb-btn-sm" onclick="app.switchTab('leaderboard')">Full View →</button>
+                        </div>
+                        <div class="leaderboard-table-wrap">
+                            <table class="bb-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Contestant</th>
+                                        <th>Team</th>
+                                        <th>Status</th>
+                                        <th>Points</th>
+                                        <th>Quick Adjust</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboardBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Task Timer & Quick Actions -->
+                <div class="col-4">
+                    <!-- Task Timer Card -->
+                    <div class="bb-card border-cyan" style="margin-bottom: 20px;">
+                        <div class="card-header">
+                            <h3 class="card-title">⏱️ Task Countdown Timer</h3>
+                            <span class="pill pill-active">Synched</span>
+                        </div>
+                        <div class="timer-container">
+                            <div class="timer-digits" id="timerDigits">05:00</div>
+                            <div class="timer-progress">
+                                <div class="timer-bar" id="timerBar" style="width: 100%;"></div>
+                            </div>
+                            <div class="timer-presets">
+                                <button class="preset-btn" data-seconds="30">30s</button>
+                                <button class="preset-btn" data-seconds="60">1m</button>
+                                <button class="preset-btn" data-seconds="120">2m</button>
+                                <button class="preset-btn" data-seconds="300">5m</button>
+                                <button class="preset-btn" data-seconds="600">10m</button>
+                            </div>
+                            <div class="timer-controls">
+                                <button class="bb-btn bb-btn-cyan" id="startTimerBtn">▶ Start</button>
+                                <button class="bb-btn bb-btn-outline" id="pauseTimerBtn" style="display: none;">⏸ Pause</button>
+                                <button class="bb-btn bb-btn-outline" id="resetTimerBtn">🔄 Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Big Boss Announcement Box -->
+                    <div class="bb-card border-red">
+                        <div class="card-header">
+                            <h3 class="card-title">📢 Instant Decree</h3>
+                        </div>
+                        <div class="form-group">
+                            <textarea class="form-textarea" id="announcementInput" placeholder="Bigg Boss chahte hain ki... (Type announcement for AI voice broadcast)"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="bb-btn bb-btn-primary" style="flex: 1;" onclick="app.broadcastAnnouncement()">
+                                🎙️ Broadcast Voice
+                            </button>
+                            <button class="bb-btn bb-btn-outline" onclick="window.soundEngine.playAnnouncementChime();" title="Test Chime">🔔</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: CONTESTANTS ================= -->
+        <div class="tab-panel" id="tab-contestants">
+            <div class="bb-card" style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; flex-grow: 1; max-width: 800px;">
+                        <input type="text" id="contestantSearch" class="form-input" style="max-width: 260px;" placeholder="🔍 Search contestant...">
+                        <select id="teamFilter" class="form-select" style="max-width: 200px;">
+                            <option value="all">All Teams</option>
+                            <option value="Neural Titans">Neural Titans</option>
+                            <option value="Algorithm Avengers">Algorithm Avengers</option>
+                            <option value="Kernel Force">Kernel Force</option>
+                            <option value="Crypto Syndicate">Crypto Syndicate</option>
+                        </select>
+                        <select id="statusFilter" class="form-select" style="max-width: 180px;">
+                            <option value="all">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="nominated">Nominated</option>
+                            <option value="immune">Immune</option>
+                            <option value="captain">Captain</option>
+                            <option value="evicted">Evicted</option>
+                        </select>
+                    </div>
+
+                    <button class="bb-btn bb-btn-cyan" onclick="app.openCreateContestantModal()">
+                        ➕ Add New Contestant
+                    </button>
+                </div>
+            </div>
+
+            <div class="contestant-grid" id="contestantsGrid"></div>
+        </div>
+
+        <!-- ================= TAB 3: LEADERBOARD ================= -->
+        <div class="tab-panel" id="tab-leaderboard">
+            <div class="bb-card border-gold">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">🏆 Official Tech House Leaderboard</h2>
+                        <p class="card-subtitle">Real-time standings updated dynamically upon task completions, rewards, and penalties</p>
+                    </div>
+                </div>
+                <div class="leaderboard-table-wrap">
+                    <table class="bb-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Contestant</th>
+                                <th>Team</th>
+                                <th>Status</th>
+                                <th>Total Points</th>
+                                <th>Point Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardBodyTab"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: DANGER ZONE ================= -->
+        <div class="tab-panel" id="tab-danger">
+            <div class="danger-zone-header">
+                <h2 style="font-family: var(--font-heading); font-size: 1.8rem; color: var(--primary-red); letter-spacing: 2px;">⚠️ THE DANGER ZONE</h2>
+                <p style="color: var(--text-muted); margin-top: 6px; font-size: 0.95rem;">Contestants currently nominated for eviction. Immune members and Captain are protected from nomination.</p>
+                <div style="margin-top: 14px; display: flex; justify-content: center; gap: 10px;">
+                    <button class="bb-btn bb-btn-danger" onclick="window.soundEngine.playNominationSiren();">🚨 Sound Red Alert Siren</button>
+                    <button class="bb-btn bb-btn-outline" onclick="app.switchTab('contestants')">Manage Nominations →</button>
+                </div>
+            </div>
+
+            <div class="danger-zone-grid" id="dangerZoneGrid"></div>
+        </div>
+
+        <!-- ================= TAB 5: TASKS & TIMER ================= -->
+        <div class="tab-panel" id="tab-tasks">
+            <div class="overview-grid">
+                <div class="col-8">
+                    <div class="bb-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">📋 House Task Queue</h3>
+                                <p class="card-subtitle">Complete assigned tasks to immediately credit points to housemates</p>
+                            </div>
+                            <button class="bb-btn bb-btn-cyan bb-btn-sm" onclick="app.openCreateTaskModal()">➕ New Task</button>
+                        </div>
+                        <div class="task-grid" id="tasksGrid"></div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <div class="bb-card border-cyan">
+                        <div class="card-header">
+                            <h3 class="card-title">⏱️ Master Task Timer</h3>
+                        </div>
+                        <div class="timer-container">
+                            <div class="timer-digits" id="timerDigitsTab">05:00</div>
+                            <div class="timer-progress">
+                                <div class="timer-bar" id="timerBarTab" style="width: 100%;"></div>
+                            </div>
+                            <div class="timer-presets">
+                                <button class="preset-btn" data-seconds="30">30s</button>
+                                <button class="preset-btn" data-seconds="60">1m</button>
+                                <button class="preset-btn" data-seconds="120">2m</button>
+                                <button class="preset-btn" data-seconds="300">5m</button>
+                                <button class="preset-btn" data-seconds="600">10m</button>
+                                <button class="preset-btn" data-seconds="900">15m</button>
+                            </div>
+                            <div class="timer-controls">
+                                <button class="bb-btn bb-btn-cyan" onclick="app.startTimer()">▶ Start</button>
+                                <button class="bb-btn bb-btn-outline" onclick="app.pauseTimer()">⏸ Pause</button>
+                                <button class="bb-btn bb-btn-outline" onclick="app.resetTimer()">🔄 Reset</button>
+                                <button class="bb-btn bb-btn-danger" onclick="window.soundEngine.playTimerBuzzer()">🚨 Buzzer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 6: BIG BOSS STUDIO ================= -->
+        <div class="tab-panel" id="tab-announcements">
+            <div class="overview-grid">
+                <div class="col-7">
+                    <div class="bb-card border-red">
+                        <div class="card-header">
+                            <h3 class="card-title">🎙️ Big Boss Intercom & Voice Broadcast</h3>
+                            <span id="studioOnAirBadge" class="on-air-badge" style="display: none;">● LIVE ON AIR</span>
+                        </div>
+
+                        <!-- LIVE MICROPHONE INTERCOM PA BOX -->
+                        <div style="background: rgba(229, 9, 20, 0.08); border: 1px solid rgba(229, 9, 20, 0.35); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-family: var(--font-heading); font-size: 0.92rem; font-weight: 700; color: #fff;">🎙️ Lead Microphone PA System</span>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">Direct Intercom to House</span>
+                            </div>
+
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+                                Broadcast your actual voice live through the House speakers with authentic Big Boss low-end resonance and PA room reverb.
+                            </p>
+
+                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
+                                <button class="bb-btn bb-btn-danger" id="studioMicToggleBtn" onclick="app.toggleMicBroadcast()" style="flex: 1;">
+                                    <span id="studioMicIcon">🎙️</span> <span id="studioMicText">Start Live Mic Broadcast</span>
+                                </button>
+                                <button class="bb-btn bb-btn-outline" id="studioDictationBtn" onclick="app.toggleDictation()" title="Dictate voice to text in Hindi or English">
+                                    🎤 Voice Dictation
+                                </button>
+                            </div>
+
+                            <canvas id="studioMicCanvas" width="400" height="32" class="mic-visualizer-canvas" style="width: 100%; height: 32px; display: none;"></canvas>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Type or Dictate Custom Decree</label>
+                            <textarea class="form-textarea" id="studioAnnouncementText" placeholder="Bigg Boss chahte hain ki sabhi gharwale garden area me assemble ho jayein... (or click Voice Dictation above to speak)"></textarea>
+                        </div>
+                        <button class="bb-btn bb-btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="app.broadcastAnnouncement(document.getElementById('studioAnnouncementText').value)">
+                            📢 Broadcast Official Big Boss Baritone Voice
+                        </button>
+
+                        <h4 style="font-family: var(--font-heading); font-size: 0.95rem; color: var(--primary-gold); margin-bottom: 12px;">⚡ Classic Big Boss Show Dialogues</h4>
+                        <div class="announcement-presets">
+                            <div class="preset-card" onclick="app.broadcastAnnouncement('Bigg Boss chahte hain ki sabhi sadasya living area mein ekathha ho jayein!')">
+                                <div class="preset-card-title">📢 Assemble in Living Area</div>
+                                <div class="preset-card-text">"Bigg Boss chahte hain ki sabhi sadasya living area mein ekathha ho jayein!"</div>
+                            </div>
+                            <div class="preset-card" onclick="app.broadcastAnnouncement('Bigg Boss house rules violation detected! English speaking is strictly prohibited.')">
+                                <div class="preset-card-title">⚠️ House Rule Violation</div>
+                                <div class="preset-card-text">"Bigg Boss house rules violation detected! English speaking is strictly prohibited."</div>
+                            </div>
+                            <div class="preset-card" onclick="app.broadcastAnnouncement('Attention contestants. The Captaincy Task begins now. Contestants must run to the buzzer.')">
+                                <div class="preset-card-title">👑 Captaincy Task Start</div>
+                                <div class="preset-card-text">"Attention contestants. The Captaincy Task begins now. Run to the buzzer."</div>
+                            </div>
+                            <div class="preset-card" onclick="app.broadcastAnnouncement('Bigg Boss orders an immediate freeze! Nobody will move until further notice.')">
+                                <div class="preset-card-title">🛑 Freeze Command</div>
+                                <div class="preset-card-text">"Bigg Boss orders an immediate freeze! Nobody will move until further notice."</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-5">
+                    <div class="bb-card">
+                        <div class="card-header">
+                            <h3 class="card-title">📜 Broadcast Log</h3>
+                        </div>
+                        <div id="announcementsLog" style="max-height: 520px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 7: SFX SOUNDBOARD ================= -->
+        <div class="tab-panel" id="tab-soundboard">
+            <div class="bb-card">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">🔊 Authentic Bigg Boss Series Audio & Soundboard</h3>
+                        <p class="card-subtitle">Featuring the actual TV series musical motifs (Bhairav Thaat melody, temple gong, & iron gate doom impact)</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 14px;">
+                    <button class="bb-btn bb-btn-outline" style="padding: 18px; display: flex; flex-direction: column; gap: 8px; text-align: center; border-color: rgba(255, 30, 86, 0.4);" onclick="window.soundEngine.playEyeTheme()">
+                        <span style="font-size: 1.8rem;">👁️</span>
+                        <span style="color: var(--primary-red); font-weight: 800;">Authentic Bigg Boss Title Theme</span>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);">Original Re-Ma-Pa-Dha flute & sitar riff with timpani boom</span>
+                    </button>
+
+                    <button class="bb-btn bb-btn-outline" style="padding: 18px; display: flex; flex-direction: column; gap: 8px; text-align: center; border-color: rgba(255, 215, 0, 0.4);" onclick="window.soundEngine.playAnnouncementChime()">
+                        <span style="font-size: 1.8rem;">🔔</span>
+                        <span style="color: var(--primary-gold); font-weight: 800;">Authentic Temple Gong</span>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);">Resonant bronze singing bowl announcement chime</span>
+                    </button>
+
+                    <button class="bb-btn bb-btn-outline" style="padding: 18px; display: flex; flex-direction: column; gap: 8px; text-align: center;" onclick="window.soundEngine.playNominationSiren()">
+                        <span style="font-size: 1.8rem;">🚨</span>
+                        <span>Nomination Red Alert Siren</span>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);">Pulsating emergency sweep with heartbeat</span>
+                    </button>
+
+                    <button class="bb-btn bb-btn-outline" style="padding: 18px; display: flex; flex-direction: column; gap: 8px; text-align: center;" onclick="window.soundEngine.playEvictionDrama()">
+                        <span style="font-size: 1.8rem;">☠️</span>
+                        <span>Eviction Doom & Gate Slam</span>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);">Suspense lub-dub & heavy iron door crash</span>
+                    </button>
+
+                    <button class="bb-btn bb-btn-outline" style="padding: 18px; display: flex; flex-direction: column; gap: 8px; text-align: center;" onclick="window.soundEngine.playCaptainFanfare()">
+                        <span style="font-size: 1.8rem;">👑</span>
+                        <span>Captain Coronation</span>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);">Royal triumphant brass fanfare</span>
+                    </button>
+
+                    <button class="bb-btn bb-btn-outline" style="padding: 18px; display: flex; flex-direction: column; gap: 8px; text-align: center;" onclick="window.soundEngine.playImmunityShield()">
+                        <span style="font-size: 1.8rem;">🛡️</span>
+                        <span>Immunity Shield</span>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);">Sci-Fi forcefield modulation</span>
+                    </button>
+
+                    <button class="bb-btn bb-btn-outline" style="padding: 18px; display: flex; flex-direction: column; gap: 8px; text-align: center;" onclick="window.soundEngine.playTimerBuzzer()">
+                        <span style="font-size: 1.8rem;">🛑</span>
+                        <span>Task Buzzer / Klaxon</span>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);">Loud horn buzzer</span>
+                    </button>
+
+                    <button class="bb-btn bb-btn-outline" style="padding: 18px; display: flex; flex-direction: column; gap: 8px; text-align: center;" onclick="window.soundEngine.playPointAdd()">
+                        <span style="font-size: 1.8rem;">🪙</span>
+                        <span>Points Reward Chime</span>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);">Sparkling positive arpeggio</span>
+                    </button>
+
+                    <button class="bb-btn bb-btn-outline" style="padding: 18px; display: flex; flex-direction: column; gap: 8px; text-align: center;" onclick="window.soundEngine.playPointDeduct()">
+                        <span style="font-size: 1.8rem;">📉</span>
+                        <span>Penalty Buzzer</span>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);">Negative penalty sound</span>
+                    </button>
+
+                    <button class="bb-btn bb-btn-outline" style="padding: 18px; display: flex; flex-direction: column; gap: 8px; text-align: center;" onclick="window.soundEngine.playHeartbeat()">
+                        <span style="font-size: 1.8rem;">💓</span>
+                        <span>Suspense Heartbeat</span>
+                        <span style="font-size: 0.75rem; color: var(--text-dim);">Deep pulse heartbeat</span>
+                    </button>
+                </div>
+
+                <!-- Custom MP3 Audio Uploader -->
+                <div style="background: rgba(255, 215, 0, 0.08); border: 1px dashed rgba(255, 215, 0, 0.4); border-radius: 14px; padding: 18px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <div style="font-family: var(--font-heading); font-size: 1.05rem; color: var(--primary-gold); font-weight: 700;">🎵 Play Any Actual MP3 Audio File</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Load any official Bigg Boss mp3 ringtone or downloaded audio clip directly from your device to broadcast it live.</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="file" id="customAudioInput" accept="audio/*" style="display: none;" onchange="app.playCustomAudioFile(event)">
+                        <button class="bb-btn bb-btn-gold" onclick="document.getElementById('customAudioInput').click()">
+                            📂 Load & Play MP3 File
+                        </button>
+                        <button class="bb-btn bb-btn-outline" id="stopCustomAudioBtn" style="display: none;" onclick="app.stopCustomAudio()">
+                            ⏹ Stop Audio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 8: EVICTED HALL ================= -->
+        <div class="tab-panel" id="tab-evicted">
+            <div class="bb-card">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">☠️ Evicted Contestants Hall of Fame</h3>
+                        <p class="card-subtitle">Contestants eliminated from the Tech House. Use Wildcard to bring them back.</p>
+                    </div>
+                </div>
+                <div id="evictedGraveyardList" style="margin-top: 14px;"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= MODAL: POINTS ADJUSTMENT ================= -->
+    <div class="modal-overlay" id="pointsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">🪙 Adjust Contestant Points</h3>
+                <button class="icon-btn" onclick="app.closeModal('pointsModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="pointsModalContestantId">
+                <h4 id="pointsModalContestantName" style="color: var(--primary-gold); font-family: var(--font-heading); margin-bottom: 16px;"></h4>
+
+                <div class="form-group">
+                    <label class="form-label">Quick Preset Adjustments</label>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="bb-btn bb-btn-cyan bb-btn-sm" onclick="app.applyPointChange(50, 'Task Excellence')">+50 pts</button>
+                        <button class="bb-btn bb-btn-cyan bb-btn-sm" onclick="app.applyPointChange(100, 'Weekly Luxury Win')">+100 pts</button>
+                        <button class="bb-btn bb-btn-cyan bb-btn-sm" onclick="app.applyPointChange(200, 'House Captaincy Bonus')">+200 pts</button>
+                        <button class="bb-btn bb-btn-danger bb-btn-sm" onclick="app.applyPointChange(-20, 'Rule Infraction')">-20 pts</button>
+                        <button class="bb-btn bb-btn-danger bb-btn-sm" onclick="app.applyPointChange(-50, 'English Speaking Fine')">-50 pts</button>
+                        <button class="bb-btn bb-btn-danger bb-btn-sm" onclick="app.applyPointChange(-100, 'Direct Penalty')">-100 pts</button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">Custom Amount (+ or -)</label>
+                    <input type="number" id="customPointsInput" class="form-input" placeholder="e.g. 75 or -35">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Reason / Infraction Description</label>
+                    <input type="text" id="pointsReasonInput" class="form-input" placeholder="e.g. Outstanding code optimization or Breaking microwave rules">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="bb-btn bb-btn-outline" onclick="app.closeModal('pointsModal')">Cancel</button>
+                <button class="bb-btn bb-btn-primary" onclick="app.applyPointChange(parseInt(document.getElementById('customPointsInput').value) || 0)">Apply Points</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: NEW CONTESTANT ================= -->
+    <div class="modal-overlay" id="newContestantModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">➕ Add New Contestant</h3>
+                <button class="icon-btn" onclick="app.closeModal('newContestantModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Contestant Name</label>
+                    <input type="text" id="newContestantName" class="form-input" placeholder="e.g. Dennis Ritchie">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Team Name</label>
+                    <input type="text" id="newContestantTeam" class="form-input" placeholder="e.g. Kernel Force">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role / Tagline</label>
+                    <input type="text" id="newContestantRole" class="form-input" placeholder="e.g. C Language Creator">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Starting Points</label>
+                    <input type="number" id="newContestantPoints" class="form-input" value="500">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bio / Personality</label>
+                    <textarea id="newContestantBio" class="form-textarea" placeholder="Brief character background..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="bb-btn bb-btn-outline" onclick="app.closeModal('newContestantModal')">Cancel</button>
+                <button class="bb-btn bb-btn-cyan" onclick="app.saveNewContestant()">Enter House</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: NEW TASK ================= -->
+    <div class="modal-overlay" id="newTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">📋 Create New House Task</h3>
+                <button class="icon-btn" onclick="app.closeModal('newTaskModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Task Title</label>
+                    <input type="text" id="newTaskTitle" class="form-input" placeholder="e.g. Speed Refactoring Challenge">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Assign To Contestant</label>
+                    <select id="taskAssignSelect" class="form-select"></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reward Points</label>
+                    <input type="number" id="newTaskPoints" class="form-input" value="150">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select id="newTaskCategory" class="form-select">
+                        <option value="Captaincy Task">👑 Captaincy Task</option>
+                        <option value="Luxury Task">💎 Luxury Budget Task</option>
+                        <option value="Immunity Challenge">🛡️ Immunity Challenge</option>
+                        <option value="House Chore">🧹 House Chore</option>
+                        <option value="Hackathon">💻 Tech Hackathon</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description & Rules</label>
+                    <textarea id="newTaskDesc" class="form-textarea" placeholder="Explain the rules and pass conditions..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="bb-btn bb-btn-outline" onclick="app.closeModal('newTaskModal')">Cancel</button>
+                <button class="bb-btn bb-btn-cyan" onclick="app.saveNewTask()">Deploy Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= DRAMATIC EVICTION OVERLAY ================= -->
+    <div class="eviction-screen-overlay" id="evictionOverlay">
+        <div class="eviction-glitch-title">☠️ EVICTED!</div>
+        <img id="evictedOverlayPhoto" class="evicted-photo-huge" src="" alt="Evicted">
+        <h2 id="evictedOverlayName" style="font-family: var(--font-heading); font-size: 2.2rem; color: #fff; margin-bottom: 8px;"></h2>
+        <p id="evictedOverlayVerdict" class="eviction-verdict"></p>
+        <button class="bb-btn bb-btn-danger" style="font-size: 1.1rem; padding: 12px 28px;" onclick="app.closeEvictionOverlay()">
+            Continue House Operations →
+        </button>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="audio.js"></script>
+    <script src="app.js"></script>
+
+    <!-- Synchronize Tab 3 Leaderboard table if tab 3 is viewed -->
+    <script>
+        // Mirror leaderboard to Tab 3 table
+        const origRenderLeaderboard = app.renderLeaderboard.bind(app);
+        app.renderLeaderboard = function() {
+            origRenderLeaderboard();
+            const tabTbody = document.getElementById('leaderboardBodyTab');
+            const mainTbody = document.getElementById('leaderboardBody');
+            if (tabTbody && mainTbody) {
+                tabTbody.innerHTML = mainTbody.innerHTML;
+            }
+            const timerDigitsTab = document.getElementById('timerDigitsTab');
+            const timerDigits = document.getElementById('timerDigits');
+            if (timerDigitsTab && timerDigits) {
+                timerDigitsTab.textContent = timerDigits.textContent;
+            }
+        };
+        app.renderLeaderboard();
+    </script>
+</body>
+</html>
